@@ -3,9 +3,9 @@ package com.yupi.gudazi.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.gson.Gson;
-import com.google.gson.TypeAdapter;
 import com.google.common.reflect.TypeToken;
 import com.yupi.gudazi.common.ErrorCode;
+import com.yupi.gudazi.contant.UserConstant;
 import com.yupi.gudazi.exception.BusinessException;
 import com.yupi.gudazi.model.domain.User;
 import com.yupi.gudazi.service.UserService;
@@ -215,7 +215,43 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             return true;
         }).map(this::getSafetyUser).collect(Collectors.toList());
     }
+//4.22 5
 
+    /**
+     * 更新用户信息
+     * @param user,loginuser
+     * @return
+     */
+    @Override
+    public int updateUser(User user, User loginUser) {
+        //查询
+        long userId = user.getId();
+        if (userId<=0){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        //如果是管理员，允许更新其他用户
+        //如果不是管理员，只允许更新当前自己的信息
+        if(!isAdmin(loginUser) && userId != loginUser.getId()){
+            throw new BusinessException(ErrorCode.NO_AUTH);
+        }
+        User oldUser=userMapper.selectById(userId);
+        if (oldUser==null){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        return userMapper.updateById(user);
+
+    }
+
+
+
+    @Override
+    public User getLoginUser(HttpServletRequest request) {
+        if (request == null){
+            return null;
+        }
+        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
+        return (User) userObj;
+    }
 
 
     /**
@@ -231,6 +267,46 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     }
 
 
+
+
+
+    @Override
+    public User getloginUser(HttpServletRequest request) {
+        // 先判断是否已登录
+        if (request == null) {
+            return null;
+        }
+        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
+        if(userObj==null){
+            throw new BusinessException(ErrorCode.NO_AUTH);
+        }
+        return (User) userObj;
+    }
+
+    /**
+     * 是否为管理员
+     *
+     * @param request
+     */
+    //是否为管理员
+    @Override
+    public boolean isAdmin(HttpServletRequest request) {
+        // 仅管理员可查询
+        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
+        User user = (User) userObj;
+        return user != null && user.getUserRole() == UserConstant.ADMIN_ROLE;
+
+    }
+    /**
+     * 是否为管理员
+     *
+     * @param loginUser
+     */
+    @Override
+    public boolean isAdmin(User loginUser) {
+        return loginUser != null && loginUser.getUserRole() == UserConstant.ADMIN_ROLE;
+
+    }
 
 }
 

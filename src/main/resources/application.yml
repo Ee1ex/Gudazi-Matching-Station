@@ -8,30 +8,32 @@ spring:
     name: gudazi-backend
   # DataSource Config
   datasource:
-    driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/yupi
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/book
     username: root
     password: zhoujielun133
   # session 失效时间
   session:
     timeout: 86400
     store-type: redis
-  # redis 配置
-  redis:
-    port: 6379
-    host: localhost
-    db: 0
-    timeout: 0
-
-    pool:
 
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
+  # redis 配置
+  redis:
+    port: 6379
+    host: localhost
+    database: 1
+
+
 server:
   port: 8086
   servlet:
     context-path: /api
+    session:
+       cookie:
+         domain: localhost
 
 mybatis-plus:
   configuration:

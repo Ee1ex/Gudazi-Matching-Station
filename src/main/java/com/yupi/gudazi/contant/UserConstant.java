@@ -1,5 +1,9 @@
 package com.yupi.gudazi.contant;
 
+import com.yupi.gudazi.model.domain.User;
+
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * 用户常量
  *
@@ -26,5 +30,10 @@ public interface UserConstant {
      * 管理员权限
      */
     int ADMIN_ROLE = 1;
+
+
+
+
+
 
 }
